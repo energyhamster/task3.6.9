@@ -1,20 +1,6 @@
 import time
 import math
 import pytest
-from selenium import webdriver
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-
-
-@pytest.fixture(scope="function")
-def browser():
-    print("\nstart browser for test..")
-    browser = webdriver.Chrome()
-    yield browser
-    print("\nquit browser..")
-    browser.quit()
-
 
 
 @pytest.mark.parametrize('link', ["https://stepik.org/lesson/236895/step/1",\
@@ -29,19 +15,21 @@ def browser():
 def test_guest_should_see_login_link(browser, link):
     link = f"{link}"
     browser.get(link)
-
-    WebDriverWait(browser, 5).until(
-        EC.element_to_be_clickable((By.CLASS_NAME, "textarea.ember-text-area.ember-view")))
-
     answer = math.log(int(time.time()))
 
+    browser.implicitly_wait(15)
+
     input_field = browser.find_element_by_class_name("textarea.ember-text-area.ember-view")
-    input_field.send_keys(answer)
+    input_field.send_keys(str(answer))
 
     submit_button = browser.find_element_by_class_name("submit-submission ")
     submit_button.click()
 
-    final_text = browser.find_element_by_class_name("smart-hints__hint")
+    browser.implicitly_wait(15)
+
+    final_text = browser.find_element_by_class_name("smart-hints__hint").text
+
+    assert final_text == "Correct!", "Текст не соответствует ожидаемому!"
 
     print(final_text)
 
